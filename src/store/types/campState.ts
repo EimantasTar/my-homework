@@ -7,7 +7,7 @@ export interface Camp {
     userId: number,
 }
 
-export interface CampState {
+export interface CampsState {
     isFetching: boolean,
     data: Camp[],
     error: null | string | Error,
