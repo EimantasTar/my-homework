@@ -1,7 +1,8 @@
 import { combineReducers } from 'redux';
+import { usersSlice } from './slices/users-slice';
 
 const rootReducer = combineReducers({
-    // user: userSlice.reducer,
+    users: usersSlice.reducer,
     // camps: campsSlice.reducer,
 });
 

@@ -1,12 +1,12 @@
-import { UserState } from './types/userState';
-import { CampState } from './types/campState';
+import { UsersState } from './types/userState';
+import { CampsState } from './types/campState';
 
 export interface IInitialState {
-    users: UserState,
-    camps: CampState,
+    users: UsersState,
+    camps: CampsState,
 }
 
-const initialState: IInitialState = {
+const INITIAL_STATE: IInitialState = {
     users: {
         isFetching: false,
         data: [],
@@ -19,4 +19,4 @@ const initialState: IInitialState = {
     },
 };
 
-export default initialState;
+export default INITIAL_STATE;
