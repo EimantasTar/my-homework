@@ -7,7 +7,7 @@ import { store } from '../store/store';
 
 export const HotApp = hot(App);
 
-export const ColdApp = () => {
+export const ColdApp = (): React.ReactElement => {
     return (
         <Provider store={store}>
             <HotApp />

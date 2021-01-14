@@ -6,6 +6,7 @@ import { connect } from 'react-redux';
 import { IInitialState } from '../store/initialState';
 import { bindActionCreators, Dispatch } from 'redux';
 import { getUsersData } from '../store/actions/get-users';
+import { getCampsData } from '../store/actions/get-camps';
 
 export const mapStateToProps = (state: IInitialState): { users: UsersState, camps: CampsState } => ({
     users: state.users,
@@ -14,6 +15,7 @@ export const mapStateToProps = (state: IInitialState): { users: UsersState, camp
 
 export const mapDispatchToProps = (dispatch: Dispatch): Record<string, unknown> => bindActionCreators({
     getUsersData: () => getUsersData(),
+    getCampsData: () => getCampsData(),
 }, dispatch);
 
 interface IStateProps {
@@ -23,6 +25,7 @@ interface IStateProps {
 
 interface IDispatchProps {
     getUsersData: () => void;
+    getCampsData: () => void;
 }
 
 interface IOwnProps {
@@ -30,12 +33,12 @@ interface IOwnProps {
 
 export type AppProps = IStateProps & IDispatchProps & IOwnProps;
 
-export const App: React.FC<AppProps> = (props: AppProps) => {
-    const { users: { data }, getUsersData } = props;
-
+export const App: React.FC<AppProps> = (props: AppProps): React.ReactElement => {
+    const { users: { data }, getUsersData, getCampsData } = props;
 
     useEffect(() => {
         getUsersData();
+        getCampsData();
     }, []);
 
     return (
@@ -44,7 +47,7 @@ export const App: React.FC<AppProps> = (props: AppProps) => {
                 My Homework
             </header>
             <div>
-                {data && data.map((user: User) => <a>{user.name}</a>)}
+                {data && data.map((user: User) => <a key={user.id}>{user.name}</a>)}
             </div>
         </div>
     );
