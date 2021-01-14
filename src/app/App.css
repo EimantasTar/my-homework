@@ -28,6 +28,7 @@
 .icon {
     align-self: center;
     padding-right: 5px;
+    padding-left: 10px;
     padding-bottom: 2px;
 }
 
@@ -56,6 +57,7 @@ th.tableHeadCell {
     font-weight: bold;
     font-size: medium;
     color: aliceblue;
+    border: 1px solid white;
 }
 
 .tableBodyRow:nth-of-type(odd) {
