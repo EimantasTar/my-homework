@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import './App.css';
 import { UsersState } from '../store/types/userState';
 import { Camp, CampsState } from '../store/types/campState';
@@ -21,6 +21,10 @@ import {
 import { TABLE_HEAD_CONTENT } from '../utils/constants';
 import { GridLoader } from 'react-spinners/index';
 import CampaignInfo from '../components/campaign-info';
+import { DatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import DateFnsUtils from '@date-io/date-fns';
+import { checkDateRange } from '../utils/functions';
+
 
 export const mapStateToProps = (state: IInitialState): { users: UsersState, camps: CampsState } => ({
     users: state.users,
@@ -49,27 +53,77 @@ export type AppProps = IStateProps & IDispatchProps & IOwnProps;
 
 export const App: React.FC<AppProps> = (props: AppProps): React.ReactElement => {
     const { camps: { data }, getUsersData, getCampsData } = props;
+    const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null);
+    const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);
 
     useEffect(() => {
         getUsersData();
         getCampsData();
     }, []);
 
+    const onChangeStartDate = (date: Date | null) => {
+        if (date && selectedEndDate) {
+            const valid = checkDateRange(date, selectedEndDate);
+            if (valid) {
+                setSelectedStartDate(date);
+            }
+        } else {
+            setSelectedStartDate(date);
+        }
+    };
+
+    const onChangeEndDate = (date: Date | null) => {
+        if (selectedStartDate && date) {
+            const valid = checkDateRange(selectedStartDate, date);
+            if (valid) {
+                setSelectedEndDate(date);
+            }
+        } else {
+            setSelectedEndDate(date);
+        }
+    };
+
     return (
         <div className="App">
             <header className="App-header">
                 My Homework
             </header>
-            <Container>
-                <Container className="containerWrapper">
-                    <Grid container>
-                        <Grid item xs className="containerWrapper"> Start Date</Grid>
-                        <Grid item xs className="containerWrapper">End Date</Grid>
-                        <Grid item xs />
-                        <Grid item xs className="containerWrapper">Search by name</Grid>
+            <Container className="containerWrapper" maxWidth="lg">
+                <Container className="containerWrapper border">
+                    <Grid container className="containerWrapper">
+                        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                            <Grid item xs className="flex-start">
+                                <div className="datePicker">
+                                    <DatePicker
+                                        margin="normal"
+                                        label="Start Date"
+                                        format="dd/MM/yyyy"
+                                        value={selectedStartDate}
+                                        onChange={onChangeStartDate}
+                                        clearable
+                                        clearLabel="clear"
+                                    />
+                                </div>
+                            </Grid>
+                            <Grid item xs className="flex-start">
+                                <div className="datePicker">
+                                    <DatePicker
+                                        margin="normal"
+                                        label="End Date"
+                                        format="dd/MM/yyyy"
+                                        value={selectedEndDate}
+                                        onChange={onChangeEndDate}
+                                        clearable
+                                        clearLabel="clear"
+                                    />
+                                </div>
+                            </Grid>
+                            <Grid item xs />
+                            <Grid item xs className="flex-end">Search by name</Grid>
+                        </MuiPickersUtilsProvider>
                     </Grid>
                     <Container className="containerWrapper">
-                        <TableContainer component={Paper}>
+                        <TableContainer className="tableContainerWrapper" component={Paper}>
                             {data.length ?
                                 <Table>
                                     <TableHead>
@@ -81,7 +135,12 @@ export const App: React.FC<AppProps> = (props: AppProps): React.ReactElement => 
                                     </TableHead>
                                     <TableBody>
                                         {data.map((item: Camp, index: number) =>
-                                            <CampaignInfo key={index} item={item} />
+                                            <CampaignInfo
+                                                key={index}
+                                                item={item}
+                                                selectedStartDate={selectedStartDate}
+                                                selectedEndDate={selectedEndDate}
+                                            />
                                         )}
                                     </TableBody>
                                 </Table>

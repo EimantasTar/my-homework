@@ -3,7 +3,7 @@
 }
 
 .App-header {
-    background-color: #282c34;
+    background-color: #263238;
     min-height: 10vh;
     display: flex;
     flex-direction: column;
@@ -14,7 +14,18 @@
 }
 
 .border {
-    border: 1px solid black;
+    border: 1px solid #263238;
+}
+
+.flex-start {
+    display: flex;
+    align-content: flex-start;
+    padding-left: 15px;
+}
+
+.flex-end {
+    display: flex;
+    align-content: flex-end;
 }
 
 .green {
@@ -42,9 +53,11 @@
     background: white;
     height: auto;
     margin: 20px;
-    padding: 20px;
     position: center;
-    border: 1px solid black;
+}
+
+.tableContainerWrapper {
+    margin-bottom: 40px;
 }
 
 th.tableHeadCell {
@@ -53,7 +66,7 @@ th.tableHeadCell {
     text-transform: capitalize;
     letter-spacing: 1px;
     white-space: nowrap;
-    background: blue;
+    background: #311b92;
     font-weight: bold;
     font-size: medium;
     color: aliceblue;
@@ -61,7 +74,7 @@ th.tableHeadCell {
 }
 
 .tableBodyRow:nth-of-type(odd) {
-    background-color: antiquewhite;
+    background-color: #cfd8dc;
 }
 
 .tableBodyCell {
@@ -72,11 +85,4 @@ th.tableHeadCell {
     display: compact;;
     margin: 100px;
     border-color: red;
-}
-
-.paper {
-    margin-top: 10px;
-    padding: 10px;
-    text-align: center;
-    color: slategrey;
 }

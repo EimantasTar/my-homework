@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { IInitialState } from '../store/initialState';
 import { User, UsersState } from '../store/types/userState';
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
-import { addZero, formatter } from '../utils/functions';
+import { formatter, getHumanDateFormat } from '../utils/functions';
 
 const mapStateToProps = (state: IInitialState) => ({
     users: state.users,
@@ -16,25 +16,28 @@ interface IStateProps {
 }
 
 interface IOwnProps {
-    item: Camp
+    item: Camp;
+    selectedStartDate: Date | null;
+    selectedEndDate: Date | null;
 }
 
 type CampaignInfoType = IOwnProps & IStateProps;
 
 export const CampaignInfo: React.FC<CampaignInfoType> = (props: CampaignInfoType) => {
-    const { item, users: { data } } = props;
+    const { item, selectedStartDate, selectedEndDate, users: { data } } = props;
     const [active, setActive] = useState<boolean>(false);
+    const [visibleItem, setVisibleItem] = useState<boolean>(false);
     const [startDate, setStartDate] = useState<string>('');
     const [endDate, setEndDate] = useState<string>('');
     const [budget, setBudget] = useState<string>('');
 
-    const getHumanDateFormat = (date: string) => {
-        const unix: number = Date.parse(date);
-        const newDate: string = new Date(unix).toLocaleDateString();
-        const day: string = addZero(parseInt(newDate.split('/')[0]));
-        const month: string = addZero(parseInt(newDate.split('/')[1]));
-        const year: string = newDate.split('/')[2];
-        return day + '/' + month + '/' + year;
+    const checkIfActive = (): void => {
+        const currentUnix: number = Date.parse((new Date().toLocaleDateString()));
+        const startUnix: number = Date.parse(item.startDate);
+        const endUnix: number = Date.parse(item.endDate);
+        if ((currentUnix > startUnix && currentUnix < endUnix) || currentUnix === startUnix || currentUnix === endUnix) {
+            setActive(true);
+        } else setActive(false);
     };
 
     useEffect(() => {
@@ -44,10 +47,38 @@ export const CampaignInfo: React.FC<CampaignInfoType> = (props: CampaignInfoType
         setStartDate(startDate);
         setEndDate(endDate);
         setBudget(budget);
+        checkIfActive();
     }, [item]);
 
+    const filterContentByDate = (selectedStartDate: Date, selectedEndDate: Date) => {
+        const selectedStartDateUnix: number = Date.parse(selectedStartDate.toLocaleDateString());
+        const startUnix: number = Date.parse(item.startDate);
+        const selectedEndDateUnix: number = Date.parse(selectedEndDate.toLocaleDateString());
+        const endUnix: number = Date.parse(item.endDate);
+        if (selectedStartDateUnix < startUnix && startUnix > selectedEndDateUnix) {
+            setVisibleItem(true);
+        } else if (selectedStartDateUnix === startUnix || startUnix === selectedEndDateUnix) {
+            setVisibleItem(true);
+        } else if (selectedStartDateUnix < endUnix && endUnix < selectedEndDateUnix) {
+            setVisibleItem(true);
+        } else if (selectedStartDateUnix === endUnix || endUnix === selectedEndDateUnix) {
+            setVisibleItem(true);
+        } else {
+            setVisibleItem(false);
+        }
+    };
+
+    useEffect(() => {
+        if (selectedStartDate && selectedEndDate) {
+            filterContentByDate(selectedStartDate, selectedEndDate);
+        } else {
+            setVisibleItem(true);
+        }
+
+    }, [selectedStartDate, selectedEndDate])
+
     const getUserNameById = (id: number): string => {
-        let username = '';
+        let username: string;
         const user: User | undefined = data && data.find((user: User) => user.id === id);
         if (user) {
             username = user.name;
@@ -56,6 +87,10 @@ export const CampaignInfo: React.FC<CampaignInfoType> = (props: CampaignInfoType
         }
         return username;
     };
+
+    if (!visibleItem) {
+        return null;
+    }
 
     return (
         <TableRow className="tableBodyRow">
