@@ -1,5 +1,22 @@
 import { Camp } from '../store/types/campState';
 
+export const checkDateRange = (start: Date, end: Date): boolean => {
+    const startString: string = start.toLocaleDateString();
+    const endString: string = end.toLocaleDateString();
+    const unixStart: number = Date.parse(startString);
+    const unixEnd: number = Date.parse(endString);
+    return unixStart <= unixEnd;
+};
+
+export const getHumanDateFormat = (date: string): string => {
+    const unix: number = Date.parse(date);
+    const newDate: string = new Date(unix).toLocaleDateString();
+    const day: string = addZero(parseInt(newDate.split('/')[1]));
+    const month: string = addZero(parseInt(newDate.split('/')[0]));
+    const year: string = newDate.split('/')[2];
+    return day + '/' + month + '/' + year;
+};
+
 export const addZero = (n: number): string => {
     return n < 10 ? '0' + n.toLocaleString() : n.toLocaleString();
 };
@@ -15,23 +32,29 @@ export const formatter = new Intl.NumberFormat('lt-LT', {
     minimumFractionDigits: 0,
 });
 
+const compareStartEndDates = (startDate: string, endDate: string): boolean => {
+    const startUnix: number = Date.parse(startDate);
+    const endUnix: number = Date.parse(endDate);
+    return startUnix <= endUnix;
+};
+
 export const validate = (array: Camp[]): boolean => {
     const requiredKey: string[] = ['id', 'name', 'startDate', 'endDate', 'Budget', 'userId'];
     const requiredValueType: string[] = ['number', 'string', 'string', 'string', 'number', 'number'];
-    const errors: string[] = [];
     let inputIsValid = false;
 
     array.map((camp: Camp, index: number) => {
+        inputIsValid = false;
+        const errors: string[] = [];
         const number: number = index + 1;
         const length: number = Object.keys(camp).length;
-        let message = '';
+        let startDate = '';
+        let endDate = '';
+
         if (length && length < 6) {
-            message = 'Please make sure all required fields are filled in objects';
+            throw new Error('Please make sure all required fields are filled in object number ' + number);
         } else if (length && length > 6) {
-            message = 'Please make sure only required fields are filled in objects';
-        }
-        if (message) {
-            throw new Error(message);
+            throw new Error('Please make sure only required fields are filled in object number ' + number);
         }
 
         requiredKey.forEach((w: string, index: number) => {
@@ -46,24 +69,36 @@ export const validate = (array: Camp[]): boolean => {
                     errors.push('Please fill the required field "' + w + '" in object that "id" = ' + camp.id);
                 }
             } else if (typeof value !== requiredValueType[index]) {
-                errors.push('Please check the type of values inserted');
-            } else if ((w === 'startDate' || w === 'endDate') && camp.id) {
+                errors.push('Please check the type of "' + value + '" inserted in object that "id" = ' + camp.id);
+            } else if (w === 'startDate') {
                 const res: boolean = validateDateFormat(value);
-                if (!res) {
-                    errors.push('Please make sure the "' + w + '" is correct in object that "id" = ' + camp.id);
+                if (res) {
+                    startDate = value;
+                } else {
+                    errors.push('Please make sure the "' + w + '" is correctly filled in object that "id" = ' + camp.id + '. Date format must be MM/DD/YYYY or MM/DD/YY');
+                }
+            } else if (w === 'endDate') {
+                const res: boolean = validateDateFormat(value);
+                if (res) {
+                    endDate = value;
+                } else {
+                    errors.push('Please make sure the "' + w + '" is correctly filled in object that "id" = ' + camp.id + '. Date format must be MM/DD/YYYY or MM/DD/YY');
                 }
             }
         });
-    });
-    if (errors.length) {
-        let message = '';
-        errors.map(item => {
-            message = message + item + '.\n';
-        });
-        throw new Error(message);
-    } else {
+        if (errors.length) {
+            let message = '';
+            errors.map(item => {
+                message = message + item + '.\n';
+            });
+            throw new Error(message);
+        } else if (startDate && endDate) {
+            const valid: boolean = compareStartEndDates(startDate, endDate);
+            if (!valid) {
+                throw new Error('Please make sure the start-date is before the end-date in object that "id" = ' + camp.id + '. Date format must be MM/DD/YYYY or MM/DD/YY');
+            }
+        }
         inputIsValid = true;
-    }
-
+    });
     return inputIsValid;
 };
