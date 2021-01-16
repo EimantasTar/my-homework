@@ -19,14 +19,16 @@ interface IOwnProps {
     item: Camp;
     selectedStartDate: Date | null;
     selectedEndDate: Date | null;
+    searchText: string;
 }
 
 type CampaignInfoType = IOwnProps & IStateProps;
 
 export const CampaignInfo: React.FC<CampaignInfoType> = (props: CampaignInfoType) => {
-    const { item, selectedStartDate, selectedEndDate, users: { data } } = props;
+    const { item, selectedStartDate, selectedEndDate, searchText, users: { data } } = props;
     const [active, setActive] = useState<boolean>(false);
     const [visibleItem, setVisibleItem] = useState<boolean>(false);
+    const [searchPass, setSearchPass] = useState<boolean>(false);
     const [startDate, setStartDate] = useState<string>('');
     const [endDate, setEndDate] = useState<string>('');
     const [budget, setBudget] = useState<string>('');
@@ -50,7 +52,7 @@ export const CampaignInfo: React.FC<CampaignInfoType> = (props: CampaignInfoType
         checkIfActive();
     }, [item]);
 
-    const filterContentByDate = (selectedStartDate: Date, selectedEndDate: Date) => {
+    const filterContentByDate = (selectedStartDate: Date, selectedEndDate: Date): void => {
         const selectedStartDateUnix: number = Date.parse(selectedStartDate.toLocaleDateString());
         const startUnix: number = Date.parse(item.startDate);
         const selectedEndDateUnix: number = Date.parse(selectedEndDate.toLocaleDateString());
@@ -75,7 +77,15 @@ export const CampaignInfo: React.FC<CampaignInfoType> = (props: CampaignInfoType
             setVisibleItem(true);
         }
 
-    }, [selectedStartDate, selectedEndDate])
+    }, [selectedStartDate, selectedEndDate, item]);
+
+    useEffect(() => {
+        if (searchText) {
+            setSearchPass(item.name.toLowerCase().includes(searchText.toLowerCase()));
+        } else {
+            setSearchPass(true);
+        }
+    }, [searchText]);
 
     const getUserNameById = (id: number): string => {
         let username: string;
@@ -88,7 +98,7 @@ export const CampaignInfo: React.FC<CampaignInfoType> = (props: CampaignInfoType
         return username;
     };
 
-    if (!visibleItem) {
+    if (!visibleItem || !searchPass) {
         return null;
     }
 

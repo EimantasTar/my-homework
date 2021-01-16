@@ -23,9 +23,14 @@
     padding-left: 15px;
 }
 
-.flex-end {
-    display: flex;
-    align-content: flex-end;
+.searchForm {
+    margin-top: 16px;
+    padding-bottom: 10px;
+}
+
+.textField {
+    white-space: nowrap;
+    text-overflow: unset;
 }
 
 .green {
@@ -85,4 +90,13 @@ th.tableHeadCell {
     display: compact;;
     margin: 100px;
     border-color: red;
+}
+
+.toolBarContainer {
+    margin-right: 40px;
+}
+
+.errors {
+    color: darkred;
+    text-align: start;
 }

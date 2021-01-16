@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { ChangeEvent, useEffect, useState } from 'react';
 import './App.css';
 import { UsersState } from '../store/types/userState';
 import { Camp, CampsState } from '../store/types/campState';
@@ -16,7 +16,7 @@ import {
     TableCell,
     TableContainer,
     TableHead,
-    TableRow,
+    TableRow, TextField,
 } from '@material-ui/core';
 import { TABLE_HEAD_CONTENT } from '../utils/constants';
 import { GridLoader } from 'react-spinners/index';
@@ -52,16 +52,28 @@ interface IOwnProps {
 export type AppProps = IStateProps & IDispatchProps & IOwnProps;
 
 export const App: React.FC<AppProps> = (props: AppProps): React.ReactElement => {
-    const { camps: { data }, getUsersData, getCampsData } = props;
+    const { camps: { data, error }, getUsersData, getCampsData } = props;
     const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null);
     const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);
+    const [searchText, setSearchText] = useState<string>('');
+    const [errorArray, setErrorArray] = useState<string[]>([]);
+
 
     useEffect(() => {
         getUsersData();
         getCampsData();
     }, []);
 
-    const onChangeStartDate = (date: Date | null) => {
+    useEffect(() => {
+        if (error && typeof error === 'string') {
+            const arr: string[] = error.split('.');
+            setErrorArray(arr);
+        } else {
+            setErrorArray([]);
+        }
+    }, [error]);
+
+    const onChangeStartDate = (date: Date | null): void => {
         if (date && selectedEndDate) {
             const valid = checkDateRange(date, selectedEndDate);
             if (valid) {
@@ -72,7 +84,7 @@ export const App: React.FC<AppProps> = (props: AppProps): React.ReactElement => 
         }
     };
 
-    const onChangeEndDate = (date: Date | null) => {
+    const onChangeEndDate = (date: Date | null): void => {
         if (selectedStartDate && date) {
             const valid = checkDateRange(selectedStartDate, date);
             if (valid) {
@@ -83,6 +95,10 @@ export const App: React.FC<AppProps> = (props: AppProps): React.ReactElement => 
         }
     };
 
+    const handleChangeText = (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>): void => {
+        setSearchText(e.target.value);
+    };
+
     return (
         <div className="App">
             <header className="App-header">
@@ -90,10 +106,21 @@ export const App: React.FC<AppProps> = (props: AppProps): React.ReactElement => 
             </header>
             <Container className="containerWrapper" maxWidth="lg">
                 <Container className="containerWrapper border">
-                    <Grid container className="containerWrapper">
-                        <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                            <Grid item xs className="flex-start">
-                                <div className="datePicker">
+                    {
+                        errorArray.length ?
+                            <div className="containerWrapper">
+                                {errorArray.map((e: string, index: number) => {
+                                    if (e !== '\n') {
+                                        return <p key={index} className="errors">* {e}</p>
+                                    }
+                                })}
+                            </div>
+                            : null
+                    }
+                    <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                        <div className="toolBarContainer">
+                            <Grid container className="containerWrapper">
+                                <Grid item lg={3} md={3} sm={6} className="flex-start">
                                     <DatePicker
                                         margin="normal"
                                         label="Start Date"
@@ -103,10 +130,8 @@ export const App: React.FC<AppProps> = (props: AppProps): React.ReactElement => 
                                         clearable
                                         clearLabel="clear"
                                     />
-                                </div>
-                            </Grid>
-                            <Grid item xs className="flex-start">
-                                <div className="datePicker">
+                                </Grid>
+                                <Grid item lg={3} md={3} sm={6} className="flex-start">
                                     <DatePicker
                                         margin="normal"
                                         label="End Date"
@@ -116,12 +141,21 @@ export const App: React.FC<AppProps> = (props: AppProps): React.ReactElement => 
                                         clearable
                                         clearLabel="clear"
                                     />
-                                </div>
+                                </Grid>
+                                <Grid item lg={3} md={3} sm={12} className="flex-start" />
+                                <Grid item lg={3} md={3} sm={12} className="flex-start">
+                                    <form noValidate autoComplete="off" className="searchForm">
+                                        <TextField
+                                            onChange={(e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => handleChangeText(e)}
+                                            className="textField"
+                                            id="standard-basic"
+                                            label="Search by name"
+                                        />
+                                    </form>
+                                </Grid>
                             </Grid>
-                            <Grid item xs />
-                            <Grid item xs className="flex-end">Search by name</Grid>
-                        </MuiPickersUtilsProvider>
-                    </Grid>
+                        </div>
+                    </MuiPickersUtilsProvider>
                     <Container className="containerWrapper">
                         <TableContainer className="tableContainerWrapper" component={Paper}>
                             {data.length ?
@@ -140,6 +174,7 @@ export const App: React.FC<AppProps> = (props: AppProps): React.ReactElement => 
                                                 item={item}
                                                 selectedStartDate={selectedStartDate}
                                                 selectedEndDate={selectedEndDate}
+                                                searchText={searchText}
                                             />
                                         )}
                                     </TableBody>
