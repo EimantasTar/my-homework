@@ -5,7 +5,8 @@ import { connect } from 'react-redux';
 import { IInitialState } from '../store/initialState';
 import { User, UsersState } from '../store/types/userState';
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
-import { formatter, getHumanDateFormat } from '../utils/functions';
+import { formatter } from '../utils/functions';
+import moment from 'moment';
 
 const mapStateToProps = (state: IInitialState) => ({
     users: state.users,
@@ -34,17 +35,17 @@ export const CampaignInfo: React.FC<CampaignInfoType> = (props: CampaignInfoType
     const [budget, setBudget] = useState<string>('');
 
     const checkIfActive = (): void => {
-        const currentUnix: number = Date.parse((new Date().toLocaleDateString()));
-        const startUnix: number = Date.parse(item.startDate);
-        const endUnix: number = Date.parse(item.endDate);
+        const currentUnix: number = moment((new Date().toLocaleDateString()), 'MM/DD/YYYY').valueOf();
+        const startUnix: number = moment(item.startDate, 'MM/DD/YYYY').valueOf();
+        const endUnix: number = moment(item.endDate, 'MM/DD/YYYY').valueOf();
         if ((currentUnix > startUnix && currentUnix < endUnix) || currentUnix === startUnix || currentUnix === endUnix) {
             setActive(true);
         } else setActive(false);
     };
 
     useEffect(() => {
-        const startDate: string = getHumanDateFormat(item.startDate);
-        const endDate: string = getHumanDateFormat(item.endDate);
+        const startDate: string = moment(item.startDate, 'MM/DD/YYYY').format('DD/MM/YYYY');
+        const endDate: string = moment(item.endDate, 'MM/DD/YYYY').format('DD/MM/YYYY');
         const budget: string = formatter.format(item.Budget);
         setStartDate(startDate);
         setEndDate(endDate);

@@ -75,7 +75,7 @@ export const App: React.FC<AppProps> = (props: AppProps): React.ReactElement => 
 
     const onChangeStartDate = (date: Date | null): void => {
         if (date && selectedEndDate) {
-            const valid = checkDateRange(date, selectedEndDate);
+            const valid: boolean = checkDateRange(date, selectedEndDate);
             if (valid) {
                 setSelectedStartDate(date);
             }
@@ -86,7 +86,7 @@ export const App: React.FC<AppProps> = (props: AppProps): React.ReactElement => 
 
     const onChangeEndDate = (date: Date | null): void => {
         if (selectedStartDate && date) {
-            const valid = checkDateRange(selectedStartDate, date);
+            const valid: boolean = checkDateRange(selectedStartDate, date);
             if (valid) {
                 setSelectedEndDate(date);
             }
