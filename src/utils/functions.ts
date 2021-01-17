@@ -8,19 +8,6 @@ export const checkDateRange = (start: Date, end: Date): boolean => {
     return unixStart <= unixEnd;
 };
 
-export const getHumanDateFormat = (date: string): string => {
-    const unix: number = Date.parse(date);
-    const newDate: string = new Date(unix).toLocaleDateString();
-    const day: string = addZero(parseInt(newDate.split('/')[1]));
-    const month: string = addZero(parseInt(newDate.split('/')[0]));
-    const year: string = newDate.split('/')[2];
-    return day + '/' + month + '/' + year;
-};
-
-export const addZero = (n: number): string => {
-    return n < 10 ? '0' + n.toLocaleString() : n.toLocaleString();
-};
-
 export const validateDateFormat = (value: string): boolean => {
     const unix: number = Date.parse(value);
     return !!unix;
@@ -52,9 +39,9 @@ export const validate = (array: Camp[]): boolean => {
         let endDate = '';
 
         if (length && length < 6) {
-            throw new Error('Please make sure all required fields are filled in object number ' + number);
+            throw new Error(`Please make sure all required fields are filled in object number ${number}`);
         } else if (length && length > 6) {
-            throw new Error('Please make sure only required fields are filled in object number ' + number);
+            throw new Error(`Please make sure only required fields are filled in object number  ${number}`);
         }
 
         requiredKey.forEach((w: string, index: number) => {
@@ -62,27 +49,27 @@ export const validate = (array: Camp[]): boolean => {
             const value = camp[w];
             if (!value) {
                 if (array.length === 1) {
-                    errors.push('Please fill the required field "' + w + '"');
+                    errors.push(`Please fill the required field "${w}"`);
                 } else if (w === 'id') {
-                    errors.push('Please fill the required field "' + w + '" in object number ' + number);
+                    errors.push(`Please fill the required field "${w}" in object number ${number}`);
                 } else {
-                    errors.push('Please fill the required field "' + w + '" in object that "id" = ' + camp.id);
+                    errors.push(`Please fill the required field "${w}" in object that "id" = ${camp.id}`);
                 }
             } else if (typeof value !== requiredValueType[index]) {
-                errors.push('Please check the type of "' + value + '" inserted in object that "id" = ' + camp.id);
+                errors.push(`Please check the type of "${value}" inserted in object that "id" = ${camp.id}`);
             } else if (w === 'startDate') {
                 const res: boolean = validateDateFormat(value);
                 if (res) {
                     startDate = value;
                 } else {
-                    errors.push('Please make sure the "' + w + '" is correctly filled in object that "id" = ' + camp.id + '. Date format must be MM/DD/YYYY or MM/DD/YY');
+                    errors.push(`Please make sure the "${w}" is correctly filled in object that "id" = ${camp.id}. Date format must be MM/DD/YYYY or MM/DD/YY`);
                 }
             } else if (w === 'endDate') {
                 const res: boolean = validateDateFormat(value);
                 if (res) {
                     endDate = value;
                 } else {
-                    errors.push('Please make sure the "' + w + '" is correctly filled in object that "id" = ' + camp.id + '. Date format must be MM/DD/YYYY or MM/DD/YY');
+                    errors.push(`Please make sure the "${w}" is correctly filled in object that "id" = ${camp.id}. Date format must be MM/DD/YYYY or MM/DD/YY`);
                 }
             }
         });
@@ -95,7 +82,7 @@ export const validate = (array: Camp[]): boolean => {
         } else if (startDate && endDate) {
             const valid: boolean = compareStartEndDates(startDate, endDate);
             if (!valid) {
-                throw new Error('Please make sure the start-date is before the end-date in object that "id" = ' + camp.id + '. Date format must be MM/DD/YYYY or MM/DD/YY');
+                throw new Error(`Please make sure the start-date is before the end-date in object that "id" = ${camp.id}. Date format must be MM/DD/YYYY or MM/DD/YY`);
             }
         }
         inputIsValid = true;

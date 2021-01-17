@@ -5,9 +5,7 @@ import reportWebVitals from './reportWebVitals';
 import { ColdApp } from './hot-cold';
 
 ReactDOM.render(
-    <React.StrictMode>
-        <ColdApp />
-    </React.StrictMode>,
+    <ColdApp />,
     document.getElementById('root')
 );
 
