@@ -58,7 +58,7 @@ export const CampaignInfo: React.FC<CampaignInfoType> = (props: CampaignInfoType
         const startUnix: number = Date.parse(item.startDate);
         const selectedEndDateUnix: number = Date.parse(selectedEndDate.toLocaleDateString());
         const endUnix: number = Date.parse(item.endDate);
-        if (selectedStartDateUnix < startUnix && startUnix > selectedEndDateUnix) {
+        if (selectedStartDateUnix < startUnix && endUnix > selectedEndDateUnix && selectedEndDateUnix > startUnix) {
             setVisibleItem(true);
         } else if (selectedStartDateUnix === startUnix || startUnix === selectedEndDateUnix) {
             setVisibleItem(true);

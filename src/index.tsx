@@ -6,8 +6,8 @@ import { ColdApp } from './hot-cold';
 
 ReactDOM.render(
     <ColdApp />,
-    document.getElementById('root')
-);
+    document.getElementById('root') || document.createElement('div')); // for testing purposes
+
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
