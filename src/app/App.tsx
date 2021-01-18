@@ -1,6 +1,5 @@
 import React, { ChangeEvent, useEffect, useState } from 'react';
 import './App.css';
-import { UsersState } from '../store/types/userState';
 import { Camp, CampsState } from '../store/types/campState';
 import { connect } from 'react-redux';
 import { IInitialState } from '../store/initialState';
@@ -26,8 +25,7 @@ import DateFnsUtils from '@date-io/date-fns';
 import { checkDateRange } from '../utils/functions';
 
 
-export const mapStateToProps = (state: IInitialState): { users: UsersState, camps: CampsState } => ({
-    users: state.users,
+export const mapStateToProps = (state: IInitialState): { camps: CampsState } => ({
     camps: state.camps,
 });
 
@@ -37,7 +35,6 @@ export const mapDispatchToProps = (dispatch: Dispatch): Record<string, unknown> 
 }, dispatch);
 
 interface IStateProps {
-    users: UsersState;
     camps: CampsState;
 }
 

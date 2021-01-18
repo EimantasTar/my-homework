@@ -19,7 +19,7 @@ export const formatter = new Intl.NumberFormat('lt-LT', {
     minimumFractionDigits: 0,
 });
 
-const compareStartEndDates = (startDate: string, endDate: string): boolean => {
+export const compareStartEndDates = (startDate: string, endDate: string): boolean => {
     const startUnix: number = Date.parse(startDate);
     const endUnix: number = Date.parse(endDate);
     return startUnix <= endUnix;
@@ -41,7 +41,7 @@ export const validate = (array: Camp[]): boolean => {
         if (length && length < 6) {
             throw new Error(`Please make sure all required fields are filled in object number ${number}`);
         } else if (length && length > 6) {
-            throw new Error(`Please make sure only required fields are filled in object number  ${number}`);
+            throw new Error(`Please make sure only required fields are filled in object number ${number}`);
         }
 
         requiredKey.forEach((w: string, index: number) => {
