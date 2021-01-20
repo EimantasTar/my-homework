@@ -106,10 +106,10 @@ export const App: React.FC<AppProps> = (props: AppProps): React.ReactElement => 
                     {
                         errorArray.length ?
                             <div className="containerWrapper">
-                                {errorArray.map((e: string, index: number) => {
+                                {errorArray.map((e: string, index: number): JSX.Element | null => {
                                     if (e !== '\n') {
                                         return <p key={index} className="errors">* {e}</p>
-                                    }
+                                    } else return null
                                 })}
                             </div>
                             : null
@@ -159,13 +159,13 @@ export const App: React.FC<AppProps> = (props: AppProps): React.ReactElement => 
                                 <Table>
                                     <TableHead>
                                         <TableRow>
-                                            {TABLE_HEAD_CONTENT.map((item: string, index: number) =>
+                                            {TABLE_HEAD_CONTENT.map((item: string, index: number): JSX.Element =>
                                                 <TableCell key={index} className="tableHeadCell">{item}</TableCell>
                                             )}
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
-                                        {data.map((item: Camp, index: number) =>
+                                        {data.map((item: Camp, index: number): JSX.Element =>
                                             <CampaignInfo
                                                 key={index}
                                                 item={item}

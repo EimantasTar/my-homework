@@ -30,7 +30,7 @@ export const validate = (array: Camp[]): boolean => {
     const requiredValueType: string[] = ['number', 'string', 'string', 'string', 'number', 'number'];
     let inputIsValid = false;
 
-    array.map((camp: Camp, index: number) => {
+    array.forEach((camp: Camp, index: number): void => {
         inputIsValid = false;
         const errors: string[] = [];
         const number: number = index + 1;
@@ -44,7 +44,7 @@ export const validate = (array: Camp[]): boolean => {
             throw new Error(`Please make sure only required fields are filled in object number ${number}`);
         }
 
-        requiredKey.forEach((w: string, index: number) => {
+        requiredKey.forEach((w: string, index: number): void => {
             // @ts-ignore
             const value = camp[w];
             if (!value) {
@@ -75,7 +75,7 @@ export const validate = (array: Camp[]): boolean => {
         });
         if (errors.length) {
             let message = '';
-            errors.map(item => {
+            errors.forEach((item: string): void => {
                 message = message + item + '.\n';
             });
             throw new Error(message);
