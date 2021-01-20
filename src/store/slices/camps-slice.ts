@@ -14,11 +14,11 @@ export const campsSlice = createSlice({
             if (state.data.length) {
                 const updatedArray: Camp[] = [];
                 const newArray: Camp[] = action.payload;
-                state.data.map(oldItem => {
+                state.data.forEach((oldItem: Camp): void => {
                     const duplicate: Camp | undefined = action.payload.find(newItem => newItem.id === oldItem.id);
                     if (duplicate) {
                         updatedArray.push(duplicate);
-                        const index = newArray.indexOf(duplicate);
+                        const index: number = newArray.indexOf(duplicate);
                         newArray.splice(index, 1);
                     } else {
                         updatedArray.push(oldItem);

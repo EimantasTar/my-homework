@@ -16,7 +16,7 @@ const {
 
 declare const window: { AddCampaigns: (array: Camp[]) => void; };
 
-export const getCampsData = () => async (dispatch: Dispatch<Action>): Promise<void> => {
+export const getCampsData = () => (dispatch: Dispatch<Action>): void => {
     window.AddCampaigns = (array: Camp[]) => {
         dispatch(addCampsRequest());
         try {
