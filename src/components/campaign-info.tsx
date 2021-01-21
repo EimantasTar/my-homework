@@ -29,25 +29,13 @@ export const CampaignInfo: React.FC<CampaignInfoType> = (props: CampaignInfoType
     const text: string = useSelector((state: IInitialState) => state.filterOptions.text);
     const [visibleItem, setVisibleItem] = useState<boolean>(false);
     const [searchPass, setSearchPass] = useState<boolean>(false);
-    const [startDate, setStartDate] = useState<string>('');
-    const [endDate, setEndDate] = useState<string>('');
-    const [budget, setBudget] = useState<string>('');
     const active: boolean = moment().startOf('day').isBetween(moment(item.startDate, 'MM/DD/YYYY'), moment(item.endDate, 'MM/DD/YYYY'), null, '[]');
 
 
-    useEffect(() => {
-        const startDate: string = moment(item.startDate, 'MM/DD/YYYY').format('DD/MM/YYYY');
-        const endDate: string = moment(item.endDate, 'MM/DD/YYYY').format('DD/MM/YYYY');
-        const budget: string = formatter.format(item.Budget);
-        setStartDate(startDate);
-        setEndDate(endDate);
-        setBudget(budget);
-    }, [item]);
-
     const filterContentByDate = (selectedStartDate: string, selectedEndDate: string): void => {
-        const selectedStartDateUnix: number = moment(selectedStartDate).valueOf();
+        const selectedStartDateUnix: number = moment(selectedStartDate, 'DD/MM/YYYY').valueOf();
         const startUnix: number = Date.parse(item.startDate);
-        const selectedEndDateUnix: number = moment(selectedEndDate).valueOf();
+        const selectedEndDateUnix: number = moment(selectedEndDate, 'DD/MM/YYYY').valueOf();
         const endUnix: number = Date.parse(item.endDate);
         if (selectedStartDateUnix < startUnix && endUnix > selectedEndDateUnix && selectedEndDateUnix > startUnix) {
             setVisibleItem(true);
@@ -98,15 +86,15 @@ export const CampaignInfo: React.FC<CampaignInfoType> = (props: CampaignInfoType
         <TableRow className="tableBodyRow">
             <TableCell className="tableBodyCell">{item.name}</TableCell>
             <TableCell className="tableBodyCell">{getUserNameById(item.userId)}</TableCell>
-            <TableCell className="tableBodyCell">{startDate}</TableCell>
-            <TableCell className="tableBodyCell">{endDate}</TableCell>
+            <TableCell className="tableBodyCell">{moment(item.startDate, 'MM/DD/YYYY').format('DD/MM/YYYY')}</TableCell>
+            <TableCell className="tableBodyCell">{moment(item.endDate, 'MM/DD/YYYY').format('DD/MM/YYYY')}</TableCell>
             <TableCell className="tableBodyCell">
                 <div className="multiCell">
                     <FiberManualRecordIcon className={active ? ' icon green' : 'icon red'} />
                     <p className="customText">{active ? 'active' : 'inactive'}</p>
                 </div>
             </TableCell>
-            <TableCell className="tableBodyCell">{budget}</TableCell>
+            <TableCell className="tableBodyCell">{formatter.format(item.Budget)}</TableCell>
         </TableRow>
     );
 };
