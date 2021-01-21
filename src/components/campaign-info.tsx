@@ -27,21 +27,13 @@ export const CampaignInfo: React.FC<CampaignInfoType> = (props: CampaignInfoType
     const selectedStartDate: string | null = useSelector((state: IInitialState) => state.filterOptions.selectedStartDate);
     const selectedEndDate: string | null = useSelector((state: IInitialState) => state.filterOptions.selectedEndDate);
     const text: string = useSelector((state: IInitialState) => state.filterOptions.text);
-    const [active, setActive] = useState<boolean>(false);
     const [visibleItem, setVisibleItem] = useState<boolean>(false);
     const [searchPass, setSearchPass] = useState<boolean>(false);
     const [startDate, setStartDate] = useState<string>('');
     const [endDate, setEndDate] = useState<string>('');
     const [budget, setBudget] = useState<string>('');
+    const active: boolean = moment().startOf('day').isBetween(moment(item.startDate, 'MM/DD/YYYY'), moment(item.endDate, 'MM/DD/YYYY'), null, '[]');
 
-    const checkIfActive = (): void => {
-        const currentUnix: number = moment((new Date().toLocaleDateString()), 'MM/DD/YYYY').valueOf();
-        const startUnix: number = moment(item.startDate, 'MM/DD/YYYY').valueOf();
-        const endUnix: number = moment(item.endDate, 'MM/DD/YYYY').valueOf();
-        if ((currentUnix > startUnix && currentUnix < endUnix) || currentUnix === startUnix || currentUnix === endUnix) {
-            setActive(true);
-        } else setActive(false);
-    };
 
     useEffect(() => {
         const startDate: string = moment(item.startDate, 'MM/DD/YYYY').format('DD/MM/YYYY');
@@ -50,7 +42,6 @@ export const CampaignInfo: React.FC<CampaignInfoType> = (props: CampaignInfoType
         setStartDate(startDate);
         setEndDate(endDate);
         setBudget(budget);
-        checkIfActive();
     }, [item]);
 
     const filterContentByDate = (selectedStartDate: string, selectedEndDate: string): void => {
