@@ -1,9 +1,11 @@
 import { UsersState } from './types/userState';
 import { CampsState } from './types/campState';
+import { FilterOptionsState } from './types/filterOptionsState';
 
 export interface IInitialState {
     users: UsersState,
     camps: CampsState,
+    filterOptions: FilterOptionsState,
 }
 
 const INITIAL_STATE: IInitialState = {
@@ -17,6 +19,11 @@ const INITIAL_STATE: IInitialState = {
         data: [],
         error: null,
     },
+    filterOptions: {
+        selectedStartDate: null,
+        selectedEndDate: null,
+        text: '',
+    }
 };
 
 export default INITIAL_STATE;

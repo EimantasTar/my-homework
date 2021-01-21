@@ -1,12 +1,5 @@
 import { Camp } from '../store/types/campState';
 
-export const checkDateRange = (start: Date, end: Date): boolean => {
-    const startString: string = start.toLocaleDateString();
-    const endString: string = end.toLocaleDateString();
-    const unixStart: number = Date.parse(startString);
-    const unixEnd: number = Date.parse(endString);
-    return unixStart <= unixEnd;
-};
 
 export const validateDateFormat = (value: string): boolean => {
     const unix: number = Date.parse(value);
@@ -76,7 +69,7 @@ export const validate = (array: Camp[]): boolean => {
         if (errors.length) {
             let message = '';
             errors.forEach((item: string): void => {
-                message = message + item + '.\n';
+                message = `${message} ${item}.`;
             });
             throw new Error(message);
         } else if (startDate && endDate) {

@@ -128,11 +128,6 @@ const data9 = [
 ];
 
 describe('functions', () => {
-    it('checkDateRange', () => {
-        const res: boolean = require('../functions').checkDateRange(new Date('11/01/2021'), new Date('11/01/2022'));
-        expect(res).toBe(true);
-    });
-
     it('validateDateFormat', () => {
         const res: boolean = require('../functions').validateDateFormat('11/30/2022');
         expect(res).toBe(true);

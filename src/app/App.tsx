@@ -1,9 +1,9 @@
-import React, { ChangeEvent, useEffect, useState } from 'react';
+import React, { ChangeEvent, useEffect } from 'react';
 import './App.css';
-import { Camp, CampsState } from '../store/types/campState';
-import { connect } from 'react-redux';
+import { Camp } from '../store/types/campState';
+import { connect, useDispatch, useSelector } from 'react-redux';
 import { IInitialState } from '../store/initialState';
-import { bindActionCreators, Dispatch } from 'redux';
+import { Action, bindActionCreators, Dispatch } from 'redux';
 import { getUsersData } from '../store/actions/get-users';
 import { getCampsData } from '../store/actions/get-camps';
 import {
@@ -22,21 +22,18 @@ import { GridLoader } from 'react-spinners/index';
 import CampaignInfo from '../components/campaign-info';
 import { DatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
-import { checkDateRange } from '../utils/functions';
+import { filterOptionsSlice } from '../store/slices/filterOptions-slice';
+import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
+import moment from 'moment';
 
 
-export const mapStateToProps = (state: IInitialState): { camps: CampsState } => ({
-    camps: state.camps,
-});
-
-export const mapDispatchToProps = (dispatch: Dispatch): Record<string, unknown> => bindActionCreators({
+export const mapDispatchToProps = (dispatch: Dispatch): {
+    getUsersData: () => (dispatch: Dispatch<Action>) => Promise<void>;
+    getCampsData: () => (dispatch: Dispatch<Action>) => void;
+} => bindActionCreators({
     getUsersData: () => getUsersData(),
     getCampsData: () => getCampsData(),
 }, dispatch);
-
-interface IStateProps {
-    camps: CampsState;
-}
 
 interface IDispatchProps {
     getUsersData: () => void;
@@ -46,54 +43,51 @@ interface IDispatchProps {
 interface IOwnProps {
 }
 
-export type AppProps = IStateProps & IDispatchProps & IOwnProps;
+export type AppProps = IDispatchProps & IOwnProps;
 
 export const App: React.FC<AppProps> = (props: AppProps): React.ReactElement => {
-    const { camps: { data, error }, getUsersData, getCampsData } = props;
-    const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null);
-    const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);
-    const [searchText, setSearchText] = useState<string>('');
-    const [errorArray, setErrorArray] = useState<string[]>([]);
-
+    const { getUsersData, getCampsData } = props;
+    const { data, error }: { data: Camp[], error: null | string | Error } = useSelector((state: IInitialState) => state.camps);
+    const { selectedStartDate }: { selectedStartDate: string | null } = useSelector((state: IInitialState) => state.filterOptions);
+    const { selectedEndDate }: { selectedEndDate: string | null } = useSelector((state: IInitialState) => state.filterOptions);
+    const dispatch = useDispatch();
+    const { changeStartDate, changeEndDate, changeText }: {
+        changeStartDate: ActionCreatorWithPayload<string | null>,
+        changeEndDate: ActionCreatorWithPayload<string | null>,
+        changeText: ActionCreatorWithPayload<string>,
+    } = filterOptionsSlice.actions;
 
     useEffect(() => {
         getUsersData();
         getCampsData();
     }, []);
 
-    useEffect(() => {
-        if (error && typeof error === 'string') {
-            const arr: string[] = error.split('.');
-            setErrorArray(arr);
-        } else {
-            setErrorArray([]);
-        }
-    }, [error]);
-
-    const onChangeStartDate = (date: Date | null): void => {
+    const handleChangeStartDate = (date: Date | null) => {
         if (date && selectedEndDate) {
-            const valid: boolean = checkDateRange(date, selectedEndDate);
-            if (valid) {
-                setSelectedStartDate(date);
+            const dateUnix: number = moment(date).startOf('day').valueOf();
+            const selectedEndDateUnix: number = moment(moment(selectedEndDate, 'DD/MM/YYYY').toDate()).valueOf();
+            if (dateUnix <= selectedEndDateUnix) {
+                dispatch(changeStartDate(moment(date).format('DD/MM/YYYY')));
             }
+        } else if (date) {
+            dispatch(changeStartDate(moment(date).format('DD/MM/YYYY')));
         } else {
-            setSelectedStartDate(date);
+            dispatch(changeStartDate(null));
         }
     };
 
-    const onChangeEndDate = (date: Date | null): void => {
+    const handleChangeEndDate = (date: Date | null) => {
         if (selectedStartDate && date) {
-            const valid: boolean = checkDateRange(selectedStartDate, date);
-            if (valid) {
-                setSelectedEndDate(date);
+            const dateUnix: number = moment(date).startOf('day').valueOf();
+            const selectedStartDateUnix: number = moment(moment(selectedStartDate, 'DD/MM/YYYY').toDate()).valueOf();
+            if (dateUnix >= selectedStartDateUnix) {
+                dispatch(changeEndDate(moment(date).format('DD/MM/YYYY')));
             }
+        } else if (date) {
+            dispatch(changeEndDate(moment(date).format('DD/MM/YYYY')));
         } else {
-            setSelectedEndDate(date);
+            dispatch(changeEndDate(null));
         }
-    };
-
-    const handleChangeText = (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>): void => {
-        setSearchText(e.target.value);
     };
 
     return (
@@ -103,16 +97,14 @@ export const App: React.FC<AppProps> = (props: AppProps): React.ReactElement => 
             </header>
             <Container className="containerWrapper" maxWidth="lg">
                 <Container className="containerWrapper border">
-                    {
-                        errorArray.length ?
-                            <div className="containerWrapper">
-                                {errorArray.map((e: string, index: number): JSX.Element | null => {
-                                    if (e !== '\n') {
-                                        return <p key={index} className="errors">* {e}</p>
-                                    } else return null
-                                })}
-                            </div>
-                            : null
+                    {error && typeof error === 'string' &&
+                    <div className="containerWrapper">
+                        {error.split('.').map((e: string, index: number): JSX.Element | null => {
+                            if (e !== '') {
+                                return <p key={index} className="errors">* {e}</p>
+                            } else return null
+                        })}
+                    </div>
                     }
                     <MuiPickersUtilsProvider utils={DateFnsUtils}>
                         <div className="toolBarContainer">
@@ -122,8 +114,8 @@ export const App: React.FC<AppProps> = (props: AppProps): React.ReactElement => 
                                         margin="normal"
                                         label="Start Date"
                                         format="dd/MM/yyyy"
-                                        value={selectedStartDate}
-                                        onChange={onChangeStartDate}
+                                        value={selectedStartDate ? moment(selectedStartDate, 'DD/MM/YYYY').toDate() : null}
+                                        onChange={handleChangeStartDate}
                                         clearable
                                         clearLabel="clear"
                                     />
@@ -133,8 +125,8 @@ export const App: React.FC<AppProps> = (props: AppProps): React.ReactElement => 
                                         margin="normal"
                                         label="End Date"
                                         format="dd/MM/yyyy"
-                                        value={selectedEndDate}
-                                        onChange={onChangeEndDate}
+                                        value={selectedEndDate ? moment(selectedEndDate, 'DD/MM/YYYY').toDate() : null}
+                                        onChange={handleChangeEndDate}
                                         clearable
                                         clearLabel="clear"
                                     />
@@ -143,7 +135,8 @@ export const App: React.FC<AppProps> = (props: AppProps): React.ReactElement => 
                                 <Grid item lg={3} md={3} sm={12} className="flex-start">
                                     <form noValidate autoComplete="off" className="searchForm">
                                         <TextField
-                                            onChange={(e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => handleChangeText(e)}
+                                            onChange={(e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) =>
+                                                dispatch(changeText(e.target.value))}
                                             className="textField"
                                             id="standard-basic"
                                             label="Search by name"
@@ -166,13 +159,7 @@ export const App: React.FC<AppProps> = (props: AppProps): React.ReactElement => 
                                     </TableHead>
                                     <TableBody>
                                         {data.map((item: Camp, index: number): JSX.Element =>
-                                            <CampaignInfo
-                                                key={index}
-                                                item={item}
-                                                selectedStartDate={selectedStartDate}
-                                                selectedEndDate={selectedEndDate}
-                                                searchText={searchText}
-                                            />
+                                            <CampaignInfo key={index} item={item} />
                                         )}
                                     </TableBody>
                                 </Table>
@@ -189,4 +176,4 @@ export const App: React.FC<AppProps> = (props: AppProps): React.ReactElement => 
     );
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(App as React.ComponentType<IOwnProps>);
+export default connect(null, mapDispatchToProps)(App as React.ComponentType<IOwnProps>);
