@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { TableCell, TableRow } from '@material-ui/core';
 import { Camp } from '../store/types/campState';
-import { connect } from 'react-redux';
+import { connect, useSelector } from 'react-redux';
 import { IInitialState } from '../store/initialState';
 import { User, UsersState } from '../store/types/userState';
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
@@ -18,30 +18,22 @@ interface IStateProps {
 
 interface IOwnProps {
     item: Camp;
-    selectedStartDate: Date | null;
-    selectedEndDate: Date | null;
-    searchText: string;
 }
 
 type CampaignInfoType = IOwnProps & IStateProps;
 
 export const CampaignInfo: React.FC<CampaignInfoType> = (props: CampaignInfoType) => {
-    const { item, selectedStartDate, selectedEndDate, searchText, users: { data } } = props;
-    const [active, setActive] = useState<boolean>(false);
+    const { item, users: { data } } = props;
+    const selectedStartDate: string | null = useSelector((state: IInitialState) => state.filterOptions.selectedStartDate);
+    const selectedEndDate: string | null = useSelector((state: IInitialState) => state.filterOptions.selectedEndDate);
+    const text: string = useSelector((state: IInitialState) => state.filterOptions.text);
     const [visibleItem, setVisibleItem] = useState<boolean>(false);
     const [searchPass, setSearchPass] = useState<boolean>(false);
     const [startDate, setStartDate] = useState<string>('');
     const [endDate, setEndDate] = useState<string>('');
     const [budget, setBudget] = useState<string>('');
+    const active: boolean = moment().startOf('day').isBetween(moment(item.startDate, 'MM/DD/YYYY'), moment(item.endDate, 'MM/DD/YYYY'), null, '[]');
 
-    const checkIfActive = (): void => {
-        const currentUnix: number = moment((new Date().toLocaleDateString()), 'MM/DD/YYYY').valueOf();
-        const startUnix: number = moment(item.startDate, 'MM/DD/YYYY').valueOf();
-        const endUnix: number = moment(item.endDate, 'MM/DD/YYYY').valueOf();
-        if ((currentUnix > startUnix && currentUnix < endUnix) || currentUnix === startUnix || currentUnix === endUnix) {
-            setActive(true);
-        } else setActive(false);
-    };
 
     useEffect(() => {
         const startDate: string = moment(item.startDate, 'MM/DD/YYYY').format('DD/MM/YYYY');
@@ -50,13 +42,12 @@ export const CampaignInfo: React.FC<CampaignInfoType> = (props: CampaignInfoType
         setStartDate(startDate);
         setEndDate(endDate);
         setBudget(budget);
-        checkIfActive();
     }, [item]);
 
-    const filterContentByDate = (selectedStartDate: Date, selectedEndDate: Date): void => {
-        const selectedStartDateUnix: number = Date.parse(selectedStartDate.toLocaleDateString());
+    const filterContentByDate = (selectedStartDate: string, selectedEndDate: string): void => {
+        const selectedStartDateUnix: number = moment(selectedStartDate).valueOf();
         const startUnix: number = Date.parse(item.startDate);
-        const selectedEndDateUnix: number = Date.parse(selectedEndDate.toLocaleDateString());
+        const selectedEndDateUnix: number = moment(selectedEndDate).valueOf();
         const endUnix: number = Date.parse(item.endDate);
         if (selectedStartDateUnix < startUnix && endUnix > selectedEndDateUnix && selectedEndDateUnix > startUnix) {
             setVisibleItem(true);
@@ -81,12 +72,12 @@ export const CampaignInfo: React.FC<CampaignInfoType> = (props: CampaignInfoType
     }, [selectedStartDate, selectedEndDate, item]);
 
     useEffect(() => {
-        if (searchText) {
-            setSearchPass(item.name.toLowerCase().includes(searchText.toLowerCase()));
+        if (text) {
+            setSearchPass(item.name.toLowerCase().includes(text.toLowerCase()));
         } else {
             setSearchPass(true);
         }
-    }, [searchText]);
+    }, [text]);
 
     const getUserNameById = (id: number): string => {
         let username: string;
